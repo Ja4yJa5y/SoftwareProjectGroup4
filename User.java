@@ -37,10 +37,7 @@ public class User {
         return false;
     }
 
-    
-    
-
-    public void register() {
+    public boolean register() {
         String sql = "INSERT INTO users (first_name, last_name, username, password, role) VALUES (?,?,?,?,?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -55,10 +52,14 @@ public class User {
             ResultSet rs = ps.getGeneratedKeys();
             if (rs.next()) {
                 this.userId = rs.getInt(1);
+                return true;
+
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+            return false;
+        
     }
 
     // Add setters so you can set before register()

@@ -81,10 +81,6 @@ public class BookDetailsPanel extends JPanel {
 
         center.add(detailsCard, BorderLayout.CENTER);
 
-//        // ===== Image Section =====
-//        JLabel imageLabel = ImageUtils.createBackgroundLabel("b3.png", 260, 360);
-//        imageLabel.setBorder(new LineBorder(new Color(220, 220, 220), 1, true));
-//        center.add(imageLabel, BorderLayout.EAST);
 
         // ===== Bottom Actions =====
         JPanel bottom = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 10));
@@ -163,19 +159,17 @@ public class BookDetailsPanel extends JPanel {
     }
 
     private void addToCart(ActionEvent e) {
-        if (currentItem == null) return;
 
+        if (currentItem == null || !currentItem.isAvailability()) {
+            JOptionPane.showMessageDialog(this, "Book is not available.");
+            return;
+        }
+
+        app.getCartPanel().getCart().addBook(currentItem.getPrice());
+        app.getCartPanel().refreshCart();
         
-    if (!currentItem.isAvailability()) {
-        JOptionPane.showMessageDialog(this, "Book is not available.");
-        return;
+        
+
+        JOptionPane.showMessageDialog(this, "Book added to cart.");
     }
-
-    app.getCartPanel().getCart().addBook(currentItem.getPrice());
-    app.getCartPanel().refreshCart();
-
-    JOptionPane.showMessageDialog(this, "Book added to cart.");}
 }
-
-       
-

@@ -1,8 +1,9 @@
 package library;
 
-
 import javax.swing.*;
+import javax.swing.border.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.util.List;
 
@@ -20,65 +21,78 @@ public class ManagerPanel extends JPanel {
     }
 
     private void initComponents() {
-        setLayout(new BorderLayout(12, 12));
-        setBorder(BorderFactory.createEmptyBorder(14, 14, 14, 14));
+        setLayout(new BorderLayout(16, 16));
+        setBorder(BorderFactory.createEmptyBorder(18, 18, 18, 18));
+        setBackground(new Color(245, 247, 250));
 
-        // ===== Header (banner + title + logout) =====
-        JPanel header = new JPanel(new BorderLayout(10, 10));
-        header.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
-
-        JLabel banner = ImageUtils.createBackgroundLabel("b4.jpg", 1000, 140);
-        header.add(banner, BorderLayout.NORTH);
+        // ===== Header =====
+        JPanel header = new JPanel(new BorderLayout());
+        header.setOpaque(false);
 
         JLabel title = new JLabel("Manager Dashboard");
-        title.setFont(new Font("SansSerif", Font.BOLD, 24));
+        title.setFont(new Font("SansSerif", Font.BOLD, 26));
+        title.setForeground(new Color(33, 37, 41));
 
-        JButton btnLogout = new JButton("Logout");
-        btnLogout.setFocusPainted(false);
+        JButton btnLogout = createButton("Logout");
         btnLogout.addActionListener(e -> app.showScreen(ScreenNames.LOGIN));
 
-        JPanel titleRow = new JPanel(new BorderLayout());
-        titleRow.add(title, BorderLayout.WEST);
-        titleRow.add(btnLogout, BorderLayout.EAST);
-
-        header.add(titleRow, BorderLayout.SOUTH);
-
+        header.add(title, BorderLayout.WEST);
+        header.add(btnLogout, BorderLayout.EAST);
         add(header, BorderLayout.NORTH);
 
-        // ===== Center: Books Table =====
+        // ===== Main Content =====
+        JPanel content = new JPanel(new BorderLayout(14, 14));
+        content.setOpaque(false);
+        add(content, BorderLayout.CENTER);
+
+        // ===== Table Card =====
+        JPanel tableCard = createCardPanel();
+        tableCard.setLayout(new BorderLayout(10, 10));
+
+        JLabel tblTitle = new JLabel("Books List");
+        tblTitle.setFont(new Font("SansSerif", Font.BOLD, 16));
+        tblTitle.setForeground(new Color(33, 37, 41));
+        tableCard.add(tblTitle, BorderLayout.NORTH);
+
         booksModel = new DefaultTableModel(
                 new Object[]{"ID", "Title", "Author", "Genre", "Type", "Price", "Available"}, 0
         ) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // read-only table
+                return false;
             }
         };
 
         tblBooks = new JTable(booksModel);
-        tblBooks.setRowHeight(26);
-        tblBooks.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        styleTable(tblBooks);
 
         JScrollPane scroll = new JScrollPane(tblBooks);
-        scroll.setBorder(BorderFactory.createTitledBorder("Books List"));
+        scroll.setBorder(new LineBorder(new Color(220, 220, 220), 1, true));
+        scroll.getViewport().setBackground(Color.WHITE);
 
-        add(scroll, BorderLayout.CENTER);
+        tableCard.add(scroll, BorderLayout.CENTER);
+        content.add(tableCard, BorderLayout.CENTER);
 
-        // ===== Right: Actions Panel =====
-        JPanel actions = new JPanel();
-        actions.setLayout(new GridLayout(0, 1, 10, 10));
-        actions.setBorder(BorderFactory.createTitledBorder("Actions"));
+        // ===== Actions Card =====
+        JPanel actionsCard = createCardPanel();
+        actionsCard.setLayout(new BorderLayout(8, 8));
+        actionsCard.setPreferredSize(new Dimension(260, 10));
 
-        JButton btnRefresh = new JButton("Refresh Books");
-        btnRefresh.setFocusPainted(false);
+        JLabel actionsTitle = new JLabel("Actions");
+        actionsTitle.setFont(new Font("SansSerif", Font.BOLD, 16));
+        actionsTitle.setForeground(new Color(33, 37, 41));
+        actionsCard.add(actionsTitle, BorderLayout.NORTH);
+
+        JPanel actions = new JPanel(new GridLayout(0, 1, 10, 10));
+        actions.setOpaque(false);
+
+        JButton btnRefresh = createButton("Refresh Books");
         btnRefresh.addActionListener(e -> loadBooks());
 
-        JButton btnAdd = new JButton("Add New Book");
-        btnAdd.setFocusPainted(false);
+        JButton btnAdd = createButton("Add New Book");
         btnAdd.addActionListener(e -> openBookForm(null));
 
-        JButton btnUpdate = new JButton("Update Selected Book");
-        btnUpdate.setFocusPainted(false);
+        JButton btnUpdate = createButton("Update Selected Book");
         btnUpdate.addActionListener(e -> {
             LibraryItems selected = getSelectedBook();
             if (selected == null) {
@@ -88,30 +102,21 @@ public class ManagerPanel extends JPanel {
             openBookForm(selected);
         });
 
-        JButton btnDelete = new JButton("Delete Selected Book");
-        btnDelete.setFocusPainted(false);
+        JButton btnDelete = createButton("Delete Selected Book");
         btnDelete.addActionListener(e -> deleteSelectedBook());
 
-        JButton btnBorrowed = new JButton("View All Borrowed Books");
-        btnBorrowed.setFocusPainted(false);
-        btnBorrowed.addActionListener(e ->
-                JOptionPane.showMessageDialog(this, "Next step: open BorrowedBooks list dialog/panel.")
-        );
+        JButton btnBorrowed = createButton("View All Borrowed Books");
         btnBorrowed.addActionListener(e -> {
             app.getBorrowedBooksListPanel().loadAll();
             app.showScreen(ScreenNames.BORROWED_LIST);
         });
 
-        JButton btnPurchases = new JButton("View All Purchases");
-        btnPurchases.setFocusPainted(false);
-
+        JButton btnPurchases = createButton("View All Purchases");
         btnPurchases.addActionListener(e -> {
             app.getPurchasesListPanel().loadAll();
             app.showScreen(ScreenNames.PURCHASES_LIST);
         });
 
-        
-        
         actions.add(btnRefresh);
         actions.add(btnAdd);
         actions.add(btnUpdate);
@@ -119,8 +124,50 @@ public class ManagerPanel extends JPanel {
         actions.add(btnBorrowed);
         actions.add(btnPurchases);
 
-        add(actions, BorderLayout.EAST);
+        actionsCard.add(actions, BorderLayout.CENTER);
+        content.add(actionsCard, BorderLayout.EAST);
     }
+
+    // ===== Styling Helpers =====
+
+    private JPanel createCardPanel() {
+        JPanel p = new JPanel();
+        p.setBackground(Color.WHITE);
+        p.setBorder(new CompoundBorder(
+                new LineBorder(new Color(220, 220, 220), 1, true),
+                new EmptyBorder(14, 14, 14, 14)
+        ));
+        return p;
+    }
+
+    private JButton createButton(String text) {
+        JButton btn = new JButton(text);
+        btn.setFocusPainted(false);
+        btn.setForeground(Color.BLACK); // requested
+        btn.setBackground(new Color(232, 236, 241));
+        btn.setFont(new Font("SansSerif", Font.BOLD, 14));
+        btn.setBorder(new CompoundBorder(
+                new LineBorder(new Color(200, 200, 200), 1, true),
+                new EmptyBorder(10, 12, 10, 12)
+        ));
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        return btn;
+    }
+
+    private void styleTable(JTable table) {
+        table.setRowHeight(28);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        table.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        table.setGridColor(new Color(230, 230, 230));
+        table.setShowVerticalLines(false);
+
+        JTableHeader th = table.getTableHeader();
+        th.setFont(new Font("SansSerif", Font.BOLD, 13));
+        th.setForeground(new Color(33, 37, 41));
+        th.setBackground(new Color(248, 249, 250));
+    }
+
+    // ===== Logic =====
 
     private void loadBooks() {
         booksModel.setRowCount(0);
@@ -143,13 +190,12 @@ public class ManagerPanel extends JPanel {
         if (row == -1) return null;
 
         int id = (int) booksModel.getValueAt(row, 0);
-        // Best: re-fetch from DB so you always get latest record
         return LibraryItems.findById(id);
     }
 
     private void openBookForm(LibraryItems book) {
         Window window = SwingUtilities.getWindowAncestor(this);
-        BookFormDialog dialog = new BookFormDialog(window, book, () -> loadBooks());
+        BookFormDialog dialog = new BookFormDialog(window, book, this::loadBooks);
         dialog.setVisible(true);
     }
 
@@ -173,6 +219,7 @@ public class ManagerPanel extends JPanel {
                 app.getCurrentUser().getFirstName()
         );
         manager.deleteBook(selected.getId());
+
         JOptionPane.showMessageDialog(this, "Book deleted successfully.");
         loadBooks();
     }

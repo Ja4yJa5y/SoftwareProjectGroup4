@@ -1,7 +1,9 @@
 package library;
 
 import javax.swing.*;
+import javax.swing.border.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,6 +12,7 @@ import java.sql.ResultSet;
 public class MyLibraryPanel extends JPanel {
 
     private final LibraryApp app;
+
     private JTable tblBorrowed;
     private JTable tblPurchased;
 
@@ -24,18 +27,37 @@ public class MyLibraryPanel extends JPanel {
     }
 
     private void initComponents() {
-        setLayout(new BorderLayout(10,10));
-        setBorder(BorderFactory.createEmptyBorder(15,15,15,15));
+        setLayout(new BorderLayout(16, 16));
+        setBorder(BorderFactory.createEmptyBorder(18, 18, 18, 18));
+        setBackground(new Color(245, 247, 250));
 
-        JLabel header = new JLabel("My Library", SwingConstants.CENTER);
-        header.setFont(new Font("SansSerif", Font.BOLD, 22));
+        // ===== Header =====
+        JPanel header = new JPanel(new BorderLayout());
+        header.setOpaque(false);
+
+        JLabel title = new JLabel("My Library");
+        title.setFont(new Font("SansSerif", Font.BOLD, 26));
+        title.setForeground(new Color(33, 37, 41));
+        header.add(title, BorderLayout.WEST);
+
+        JButton btnBackTop = createButton("Back to Menu");
+        btnBackTop.addActionListener(e -> app.showScreen(ScreenNames.CUSTOMER_MENU));
+        header.add(btnBackTop, BorderLayout.EAST);
+
         add(header, BorderLayout.NORTH);
 
-        JPanel center = new JPanel(new GridLayout(1,2,10,10));
+        // ===== Center: Two Cards =====
+        JPanel center = new JPanel(new GridLayout(1, 2, 14, 14));
+        center.setOpaque(false);
 
-        // ================= Borrowed =================
-        JPanel borrowedPanel = new JPanel(new BorderLayout());
-        borrowedPanel.setBorder(BorderFactory.createTitledBorder("Borrowed Books"));
+        // ================= Borrowed Card =================
+        JPanel borrowedCard = createCardPanel();
+        borrowedCard.setLayout(new BorderLayout(10, 10));
+
+        JLabel borrowedTitle = new JLabel("Borrowed Books");
+        borrowedTitle.setFont(new Font("SansSerif", Font.BOLD, 16));
+        borrowedTitle.setForeground(new Color(33, 37, 41));
+        borrowedCard.add(borrowedTitle, BorderLayout.NORTH);
 
         borrowedModel = new DefaultTableModel(
                 new Object[]{"Borrow ID", "Book ID", "Title", "Borrow Date", "Due Date", "Status"}, 0
@@ -44,39 +66,93 @@ public class MyLibraryPanel extends JPanel {
         };
 
         tblBorrowed = new JTable(borrowedModel);
-        tblBorrowed.setRowHeight(26);
-        borrowedPanel.add(new JScrollPane(tblBorrowed), BorderLayout.CENTER);
+        styleTable(tblBorrowed);
 
-        JButton btnReturn = new JButton("Return Selected Book");
+        JScrollPane borrowedScroll = new JScrollPane(tblBorrowed);
+        borrowedScroll.setBorder(new LineBorder(new Color(220, 220, 220), 1, true));
+        borrowedScroll.getViewport().setBackground(Color.WHITE);
+
+        borrowedCard.add(borrowedScroll, BorderLayout.CENTER);
+
+        JButton btnReturn = createButton("Return Selected Book");
         btnReturn.addActionListener(e -> returnSelectedBook());
-        borrowedPanel.add(btnReturn, BorderLayout.SOUTH);
 
-        // ================= Purchased =================
-        JPanel purchasedPanel = new JPanel(new BorderLayout());
-        purchasedPanel.setBorder(BorderFactory.createTitledBorder("Purchased Items"));
+        JPanel borrowedBottom = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        borrowedBottom.setOpaque(false);
+        borrowedBottom.add(btnReturn);
+        borrowedCard.add(borrowedBottom, BorderLayout.SOUTH);
+
+        // ================= Purchased Card =================
+        JPanel purchasedCard = createCardPanel();
+        purchasedCard.setLayout(new BorderLayout(10, 10));
+
+        JLabel purchasedTitle = new JLabel("Purchased Items");
+        purchasedTitle.setFont(new Font("SansSerif", Font.BOLD, 16));
+        purchasedTitle.setForeground(new Color(33, 37, 41));
+        purchasedCard.add(purchasedTitle, BorderLayout.NORTH);
 
         purchasedModel = new DefaultTableModel(
                 new Object[]{"Purchase ID", "Date", "Status", "Total", "Method"}, 0
         ) {
             @Override public boolean isCellEditable(int row, int col) { return false; }
         };
-//new Object[]{"Purchase ID", "Book ID", "Title", "Date", "Status", "Total", "Method"}
 
         tblPurchased = new JTable(purchasedModel);
-        tblPurchased.setRowHeight(26);
-        purchasedPanel.add(new JScrollPane(tblPurchased), BorderLayout.CENTER);
+        styleTable(tblPurchased);
 
-        center.add(borrowedPanel);
-        center.add(purchasedPanel);
+        JScrollPane purchasedScroll = new JScrollPane(tblPurchased);
+        purchasedScroll.setBorder(new LineBorder(new Color(220, 220, 220), 1, true));
+        purchasedScroll.getViewport().setBackground(Color.WHITE);
+
+        purchasedCard.add(purchasedScroll, BorderLayout.CENTER);
+
+        center.add(borrowedCard);
+        center.add(purchasedCard);
 
         add(center, BorderLayout.CENTER);
-
-        JButton btnBack = new JButton("Back to Menu");
-        btnBack.addActionListener(e -> app.showScreen(ScreenNames.CUSTOMER_MENU));
-        add(btnBack, BorderLayout.SOUTH);
-        
-
     }
+
+    // ===== Style helpers (same as Manager/Employee) =====
+
+    private JPanel createCardPanel() {
+        JPanel p = new JPanel();
+        p.setBackground(Color.WHITE);
+        p.setBorder(new CompoundBorder(
+                new LineBorder(new Color(220, 220, 220), 1, true),
+                new EmptyBorder(14, 14, 14, 14)
+        ));
+        return p;
+    }
+
+    private JButton createButton(String text) {
+        JButton btn = new JButton(text);
+        btn.setFocusPainted(false);
+        btn.setForeground(Color.BLACK);
+        btn.setBackground(new Color(232, 236, 241));
+        btn.setFont(new Font("SansSerif", Font.BOLD, 14));
+        btn.setBorder(new CompoundBorder(
+                new LineBorder(new Color(200, 200, 200), 1, true),
+                new EmptyBorder(10, 12, 10, 12)
+        ));
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        return btn;
+    }
+
+    private void styleTable(JTable t) {
+        t.setRowHeight(28);
+        t.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        t.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        t.setGridColor(new Color(230, 230, 230));
+        t.setShowVerticalLines(false);
+        t.setBackground(Color.WHITE);
+
+        JTableHeader th = t.getTableHeader();
+        th.setFont(new Font("SansSerif", Font.BOLD, 13));
+        th.setForeground(new Color(33, 37, 41));
+        th.setBackground(new Color(248, 249, 250));
+    }
+
+    // ===== Data loading =====
 
     public void loadDataForUser(User user) {
         this.currentUser = user;
@@ -117,67 +193,36 @@ public class MyLibraryPanel extends JPanel {
     }
 
     private void loadPurchasesForUser(int userId) {
-    purchasedModel.setRowCount(0);
+        purchasedModel.setRowCount(0);
 
-    String sql =
-        "SELECT purchase_id, purchase_date, payment_status, total_cost, payment_method " +
-        "FROM purchase " +
-        "WHERE user_id = ? " +
-        "ORDER BY purchase_id DESC";
+        String sql =
+                "SELECT purchase_id, purchase_date, payment_status, total_cost, payment_method " +
+                "FROM purchase " +
+                "WHERE user_id = ? " +
+                "ORDER BY purchase_id DESC";
 
-    try (Connection conn = DBConnection.getConnection();
-         PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-        ps.setInt(1, userId);
-        try (ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                purchasedModel.addRow(new Object[]{
-                    rs.getInt("purchase_id"),
-                    rs.getDate("purchase_date"),
-                    rs.getString("payment_status"),
-                    rs.getDouble("total_cost"),
-                    rs.getString("payment_method")
-                });
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    purchasedModel.addRow(new Object[]{
+                            rs.getInt("purchase_id"),
+                            rs.getDate("purchase_date"),
+                            rs.getString("payment_status"),
+                            rs.getDouble("total_cost"),
+                            rs.getString("payment_method")
+                    });
+                }
             }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error loading purchases: " + e.getMessage());
         }
-
-    } catch (Exception e) {
-        JOptionPane.showMessageDialog(this, "Error loading purchases: " + e.getMessage());
     }
-}
 
-//    private void loadPurchasesForUser(int userId) {
-//        purchasedModel.setRowCount(0);
-//
-//        String sql =
-//                "SELECT p.purchase_id, p.book_id, i.title, p.purchase_date, p.payment_status, p.total_cost, p.payment_method " +
-//                "FROM purchases p " +
-//                "LEFT JOIN library_items i ON p.book_id = i.id " +
-//                "WHERE p.user_id = ? " +
-//                "ORDER BY p.purchase_id DESC";
-//
-//        try (Connection conn = DBConnection.getConnection();
-//             PreparedStatement ps = conn.prepareStatement(sql)) {
-//
-//            ps.setInt(1, userId);
-//            try (ResultSet rs = ps.executeQuery()) {
-//                while (rs.next()) {
-//                    purchasedModel.addRow(new Object[]{
-//                            rs.getInt("purchase_id"),
-//                            rs.getInt("book_id"),
-//                            rs.getString("title"),
-//                            rs.getDate("purchase_date"),
-//                            rs.getString("payment_status"),
-//                            rs.getDouble("total_cost"),
-//                            rs.getString("payment_method")
-//                    });
-//                }
-//            }
-//
-//        } catch (Exception e) {
-//            JOptionPane.showMessageDialog(this, "Error loading purchases: " + e.getMessage());
-//        }
-//    }
+    // ===== Return logic (same as yours) =====
 
     private void returnSelectedBook() {
         int row = tblBorrowed.getSelectedRow();
@@ -203,11 +248,9 @@ public class MyLibraryPanel extends JPanel {
         );
         if (confirm != JOptionPane.YES_OPTION) return;
 
-        // Transaction: update borrowed_books + update availability
         try (Connection conn = DBConnection.getConnection()) {
             conn.setAutoCommit(false);
 
-            // 1) Update borrowed_books status
             String sql1 = "UPDATE borrowed_books SET status='RETURNED' WHERE borrow_id=? AND status='BORROWED'";
             try (PreparedStatement ps1 = conn.prepareStatement(sql1)) {
                 ps1.setInt(1, borrowId);
@@ -219,7 +262,6 @@ public class MyLibraryPanel extends JPanel {
                 }
             }
 
-            // 2) Set availability TRUE in library_items
             String sql2 = "UPDATE library_items SET availability=TRUE WHERE id=?";
             try (PreparedStatement ps2 = conn.prepareStatement(sql2)) {
                 ps2.setInt(1, bookId);
@@ -229,7 +271,6 @@ public class MyLibraryPanel extends JPanel {
             conn.commit();
             JOptionPane.showMessageDialog(this, "Book returned successfully.");
 
-            // Refresh tables
             if (currentUser != null) {
                 loadDataForUser(currentUser);
             }

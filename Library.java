@@ -8,7 +8,6 @@ public class Library {
     
     public static void main(String[] args) {
         
-        DBInit.initialize();   // creates tables if they don't exist
         DBInit.insertUsers();// insertUsers  if they don't exist
 
         javax.swing.SwingUtilities.invokeLater(() -> {

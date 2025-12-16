@@ -17,6 +17,9 @@ public class ScreenNames {
     public static final String PAYMENT = "payment";
     public static final String MY_LIBRARY = "myLibrary";
     public static final String BORROWED_LIST = "borrowedList";
-    public static final String PURCHASES_LIST = "purchasesList";
+    public static final String PURCHASES_LIST = "purchasesList"; // REGISTER
+//    public static final String REGISTER = "register"; // REGISTER
+    public static final String ROLE_SELECTION = "ROLE_SELECTION";
+    public static final String REGISTER = "REGISTER";    
     
 }

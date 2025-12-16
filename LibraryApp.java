@@ -21,6 +21,8 @@ public class LibraryApp extends JFrame {
     private MyLibraryPanel myLibraryPanel;
     private BorrowedBooksListPanel borrowedBooksListPanel;
     private PurchasesListPanel purchasesListPanel;
+    private RoleSelectionPanel roleSelectionPanel;          // RegisterUserPanel
+    private RegisterUserPanel registerUserPanel;          // RegisterUserPanel
 
     // Logged-in user
     private User currentUser;
@@ -55,8 +57,12 @@ public class LibraryApp extends JFrame {
         myLibraryPanel = new MyLibraryPanel(this);
         borrowedBooksListPanel = new BorrowedBooksListPanel(this);
         purchasesListPanel = new PurchasesListPanel(this);
+        roleSelectionPanel = new    RoleSelectionPanel(this);  // RegisterUserPanel
+        registerUserPanel = new    RegisterUserPanel(this);  // RegisterUserPanel
 
         // Add to CardLayout
+        mainPanel.add(roleSelectionPanel, ScreenNames.ROLE_SELECTION);
+        mainPanel.add(registerUserPanel, ScreenNames.REGISTER);
         mainPanel.add(loginPanel, ScreenNames.LOGIN);
         mainPanel.add(customerMenuPanel, ScreenNames.CUSTOMER_MENU);
         mainPanel.add(managerPanel, ScreenNames.MANAGER_MENU);
@@ -70,7 +76,10 @@ public class LibraryApp extends JFrame {
         mainPanel.add(purchasesListPanel, ScreenNames.PURCHASES_LIST);
 
 
-        showScreen(ScreenNames.LOGIN);
+//        showScreen(ScreenNames.CUSTOMER_MENU);
+        showScreen(ScreenNames.ROLE_SELECTION);
+
+
     }
 
     public void showScreen(String name) {

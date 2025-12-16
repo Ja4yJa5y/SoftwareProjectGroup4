@@ -86,23 +86,13 @@ public class LoginPanel extends JPanel {
         gbc.insets = new Insets(14, 8, 8, 8);
         card.add(btnLogin, gbc);
 
-        JButton btnSignUp = createButton("Create Account", new Color(25, 135, 84));
-btnSignUp.addActionListener(e -> openSignUpDialog());
-
-gbc.gridx = 0; gbc.gridy = 4;
-gbc.gridwidth = 2;
-gbc.insets = new Insets(6, 8, 8, 8);
-card.add(btnSignUp, gbc);
-
-
         // Message
         lblMessage = new JLabel(" ", SwingConstants.CENTER);
         lblMessage.setFont(new Font("SansSerif", Font.PLAIN, 13));
         lblMessage.setForeground(new Color(220, 53, 69));
-      gbc.gridx = 0; gbc.gridy = 5;
-gbc.insets = new Insets(4, 8, 4, 8);
-card.add(lblMessage, gbc);
-
+        gbc.gridx = 0; gbc.gridy = 4;
+        gbc.insets = new Insets(4, 8, 4, 8);
+        card.add(lblMessage, gbc);
 
         // Add card to center wrapper
         GridBagConstraints wrap = new GridBagConstraints();
@@ -112,72 +102,6 @@ card.add(lblMessage, gbc);
         // Optional: Enter key triggers login
 //        getRootPane().setDefaultButton(btnLogin);
     }
-    
-    private void openSignUpDialog() {
-    JTextField tfName = new JTextField();
-    JTextField tfEmail = new JTextField();
-    JPasswordField pfPass = new JPasswordField();
-
-    String[] roles = {"Customer", "Employee", "Manager"};
-    JComboBox<String> cbRole = new JComboBox<>(roles);
-
-    JPanel p = new JPanel(new GridLayout(0, 1, 8, 8));
-    p.add(new JLabel("Name:"));
-    p.add(tfName);
-    p.add(new JLabel("Email (or Username):"));
-    p.add(tfEmail);
-    p.add(new JLabel("Password:"));
-    p.add(pfPass);
-    p.add(new JLabel("Role:"));
-    p.add(cbRole);
-
-    int res = JOptionPane.showConfirmDialog(this, p, "Create Account",
-            JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-
-    if (res != JOptionPane.OK_OPTION) return;
-
-    String name = tfName.getText().trim();
-    String email = tfEmail.getText().trim();
-    String pass = new String(pfPass.getPassword()).trim();
-    String role = (String) cbRole.getSelectedItem();
-
-    if (name.isEmpty() || email.isEmpty() || pass.isEmpty()) {
-        JOptionPane.showMessageDialog(this, "Please fill all fields.");
-        return;
-    }
-
-    // ✅ هنا تحفظين في الداتابيس أو قائمة داخل البرنامج
-    boolean ok = registerUser(name, email, pass, role);
-
-    if (ok) {
-        JOptionPane.showMessageDialog(this, "Account created successfully. You can login now.");
-    } else {
-        JOptionPane.showMessageDialog(this, "Failed to create account (maybe username already exists).");
-    }
-}
-
-   private boolean registerUser(String name, String email, String pass, String role) {
-    try {
-        String[] parts = name.trim().split("\\s+", 2);
-        String first = parts[0];
-        String last = (parts.length > 1) ? parts[1] : "";
-
-        User u = new User();
-        u.setFirstName(first);
-        u.setLastName(last);
-        u.setUsername(email); // هنا اعتبرناه username
-        u.setPassword(pass);
-        u.setRole(role.toUpperCase());
-        u.register();
-
-        return true;
-    } catch (Exception ex) {
-        ex.printStackTrace();
-        return false;
-    }
-}
-
-
 
     private void styleTextField(JTextField field) {
         field.setFont(new Font("SansSerif", Font.PLAIN, 14));
@@ -194,7 +118,7 @@ card.add(lblMessage, gbc);
         JButton btn = new JButton(text);
         btn.setFont(new Font("SansSerif", Font.BOLD, 15));
         btn.setBackground(bg);
-        btn.setForeground(Color.WHITE);
+        btn.setForeground(Color.BLACK);
         btn.setFocusPainted(false);
         btn.setBorder(new EmptyBorder(10, 14, 10, 14));
         btn.setPreferredSize(new Dimension(260, 42));
@@ -202,35 +126,22 @@ card.add(lblMessage, gbc);
     }
 
     private void handleLogin(ActionEvent e) {
-    String username = txtUsername.getText().trim();
-    String password = new String(txtPassword.getPassword());
+        String username = txtUsername.getText().trim();
+        String password = new String(txtPassword.getPassword());
 
-    if (username.isEmpty() || password.isEmpty()) {
-        lblMessage.setText("Please enter username and password.");
-        return;
-    }
-
-    User u = new User();
-    boolean success = u.login(username, password);
-
-    if (success) {
-        lblMessage.setText(" ");
-
-        // ✅ هنا فقط نجيب role بعد نجاح login
-        String role = u.getRole();
-
-        if ("MANAGER".equalsIgnoreCase(role)) {
-            app.showScreen(ScreenNames.MANAGER_PANEL);
-        } else if ("EMPLOYEE".equalsIgnoreCase(role)) {
-            app.showScreen(ScreenNames.EMPLOYEE_PANEL);
-        } else {
-            app.showScreen(ScreenNames.CUSTOMER_MENU); // أو SEARCH حسب مشروعك
+        if (username.isEmpty() || password.isEmpty()) {
+            lblMessage.setText("Please enter username and password.");
+            return;
         }
 
-        app.onLoginSuccess(u);
-    } else {
-        lblMessage.setText("Invalid username or password.");
-    }
-}
+        User u = new User();
+        boolean success = u.login(username, password);
 
+        if (success) {
+            lblMessage.setText(" ");
+            app.onLoginSuccess(u);
+        } else {
+            lblMessage.setText("Invalid username or password.");
+        }
+    }
 }

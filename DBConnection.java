@@ -11,21 +11,27 @@ import java.sql.SQLException;
 
 public class DBConnection {
 
-    private static final String JDBC_URL = "jdbc:derby:librarydb;create=true";
-    private static final String JDBC_USER = "";
-    private static final String JDBC_PASS = "";
+ 
+    
+    private static final String URL = "jdbc:derby://localhost:1527/LibraryDB;create=true";
+  private static final String USER = "He1234ba";
+    private static final String PASSWORD = "Aug8818390";
 
-    static {
+   public static Connection getConnection() {
         try {
-            // For embedded Derby
-            Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
+            // Make sure to load the Derby driver
+            Class.forName("org.apache.derby.jdbc.ClientDriver");
+            Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+            return conn;
         } catch (ClassNotFoundException e) {
+            System.err.println("Derby JDBC driver not found: " + e.getMessage());
             e.printStackTrace();
+            return null;
+        } catch (SQLException e) {
+            System.err.println("Database connection error: " + e.getMessage());
+            e.printStackTrace();
+            return null;
         }
-    }
-
-    public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASS);
     }
 }
 
